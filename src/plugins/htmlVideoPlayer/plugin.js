@@ -228,6 +228,10 @@ export class HtmlVideoPlayer {
     /**
      * @type {any | null | undefined}
      */
+    #currentAssJsRenderer;
+    /**
+     * @type {any | null | undefined}
+     */
     #currentPgsRenderer;
     /**
      * @type {number | undefined}
@@ -607,6 +611,9 @@ export class HtmlVideoPlayer {
         if (this.#currentAssRenderer) {
             this.updateCurrentTrackOffset(offsetValue);
             this.#currentAssRenderer.timeOffset = (this._currentPlayOptions.transcodingOffsetTicks || 0) / 10000000 + offsetValue;
+        } else if (this.#currentAssJsRenderer) {
+            // TODO: Check if delay/timeOffset is in the right direction
+            this.#currentAssJsRenderer.delay = (this._currentPlayOptions.transcodingOffsetTicks || 0) / 10000000 + offsetValue;
         } else if (this.#currentPgsRenderer) {
             this.updateCurrentTrackOffset(offsetValue);
             this.#currentPgsRenderer.timeOffset = (this._currentPlayOptions.transcodingOffsetTicks || 0) / 10000000 + offsetValue;
@@ -1191,6 +1198,12 @@ export class HtmlVideoPlayer {
         }
         this.#currentAssRenderer = null;
 
+        const ass = this.#currentAssJsRenderer;
+        if (ass) {
+            ass.destroy();
+        }
+        this.#currentAssJsRenderer = null;
+
         const pgsRenderer = this.#currentPgsRenderer;
         if (pgsRenderer) {
             pgsRenderer.dispose();
@@ -1283,6 +1296,26 @@ export class HtmlVideoPlayer {
             ApiKey: apiClient.accessToken()
         });
         const htmlVideoPlayer = this;
+
+        import('assjs').then(assjs => {
+            const ASS = assjs.default;
+            fetch(getTextTrackUrl(track, item)).then(async response => {
+                const content = await response.text();
+
+                let subtitlesContainer = document.querySelector('.assVideoSubtitles');
+                if (!subtitlesContainer) {
+                    subtitlesContainer = document.createElement('div');
+                    subtitlesContainer.classList.add('assVideoSubtitles');
+                }
+                videoElement.parentNode.appendChild(subtitlesContainer);
+
+                this.#currentAssJsRenderer = new ASS(content, videoElement, {
+                    container: subtitlesContainer
+                });
+            });
+        });
+
+        /* Disable JavascriptSubtitlesOctopus * /
         import('@jellyfin/libass-wasm').then(({ default: SubtitlesOctopus }) => {
             const mediaSource = this._currentPlayOptions.mediaSource;
             const videoStream = getMediaStreamVideoTracks(mediaSource)[0];
@@ -1341,6 +1374,7 @@ export class HtmlVideoPlayer {
                 }
             });
         });
+        /**/
     }
 
     /**

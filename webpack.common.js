@@ -137,6 +137,7 @@ const config = {
         publicPath: ''
     },
     optimization: {
+        minimize: false,
         runtimeChunk: 'single',
         removeAvailableModules: false,
         removeEmptyChunks: false,
@@ -216,6 +217,7 @@ const config = {
                     path.resolve(__dirname, 'node_modules/@tanstack/table-core'),
                     path.resolve(__dirname, 'node_modules/@tanstack/virtual-core'),
                     path.resolve(__dirname, 'node_modules/@uupaa/dynamic-import-polyfill'),
+                    path.resolve(__dirname, 'node_modules/assjs'),
                     path.resolve(__dirname, 'node_modules/axios'),
                     path.resolve(__dirname, 'node_modules/blurhash'),
                     path.resolve(__dirname, 'node_modules/compare-versions'),
