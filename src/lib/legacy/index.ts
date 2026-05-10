@@ -1,4 +1,11 @@
-import 'core-js/stable';
+//import 'core-js/stable';
+import 'core-js/es/symbol';
+import 'core-js/es/symbol/iterator';
+import 'core-js/es/object/assign';
+import 'core-js/es/promise';
+import 'core-js/es/array/from';
+import 'core-js/es/weak-map';
+
 import 'regenerator-runtime/runtime';
 import 'jquery';
 import 'element-closest-polyfill';
