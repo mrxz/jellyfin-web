@@ -2,9 +2,7 @@ import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models/base-ite
 import { PersonKind } from '@jellyfin/sdk/lib/generated-client/models/person-kind';
 import { getLibraryApi } from '@jellyfin/sdk/lib/utils/api/library-api';
 import { intervalToDuration } from 'date-fns';
-import DOMPurify from 'dompurify';
 import escapeHtml from 'escape-html';
-import markdownIt from 'markdown-it';
 import isEqual from 'lodash-es/isEqual';
 
 import { appHost } from 'components/apphost';
@@ -901,29 +899,32 @@ function renderOverview(page, item) {
     const overviewElements = page.querySelectorAll('.overview');
 
     if (overviewElements.length > 0) {
-        // eslint-disable-next-line sonarjs/disabled-auto-escaping
-        const overview = DOMPurify.sanitize(markdownIt({ html: true }).render(item.Overview || ''));
+        //const overview = DOMPurify.sanitize(markdownIt({ html: true }).render(item.Overview || ''));
+        const overview = item.Overview || '';
 
         if (overview) {
-            for (const overviewElemnt of overviewElements) {
-                overviewElemnt.innerHTML = '<bdi>' + overview + '</bdi>';
-                overviewElemnt.classList.remove('hide');
-                overviewElemnt.classList.add('detail-clamp-text');
+            for (const overviewElement of overviewElements) {
+                const bdi = document.createElement('bdi');
+                bdi.innerText = overview;
+                overviewElement.innerHTML = '';
+                overviewElement.appendChild(bdi);
+                overviewElement.classList.remove('hide');
+                overviewElement.classList.add('detail-clamp-text');
 
                 // Grab the sibling element to control the expand state
-                const expandButton = overviewElemnt.parentElement.querySelector('.overview-expand');
+                const expandButton = overviewElement.parentElement.querySelector('.overview-expand');
 
                 // Detect if we have overflow of text. Based on this StackOverflow answer
                 // https://stackoverflow.com/a/35157976
-                if (Math.abs(overviewElemnt.scrollHeight - overviewElemnt.offsetHeight) > 2) {
+                if (Math.abs(overviewElement.scrollHeight - overviewElement.offsetHeight) > 2) {
                     expandButton.classList.remove('hide');
                 } else {
                     expandButton.classList.add('hide');
                 }
 
-                expandButton.addEventListener('click', toggleLineClamp.bind(null, overviewElemnt));
+                expandButton.addEventListener('click', toggleLineClamp.bind(null, overviewElement));
 
-                for (const anchor of overviewElemnt.querySelectorAll('a')) {
+                for (const anchor of overviewElement.querySelectorAll('a')) {
                     anchor.setAttribute('target', '_blank');
                 }
             }

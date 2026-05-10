@@ -4,9 +4,7 @@
  * @module components/listview/listview
  */
 
-import DOMPurify from 'dompurify';
 import escapeHtml from 'escape-html';
-import markdownIt from 'markdown-it';
 
 import { ItemAction } from 'constants/itemAction';
 
@@ -421,8 +419,8 @@ export function getListViewHtml(options) {
         }
 
         if (enableOverview && item.Overview) {
-            // eslint-disable-next-line sonarjs/disabled-auto-escaping
-            const overview = DOMPurify.sanitize(markdownIt({ html: true }).render(item.Overview || ''));
+            //const overview = DOMPurify.sanitize(markdownIt({ html: true }).render(item.Overview || ''));
+            const overview = escapeHtml(item.Overview);
             html += '<div class="secondary listItem-overview listItemBodyText">';
             html += '<bdi>' + overview + '</bdi>';
             html += '</div>';
