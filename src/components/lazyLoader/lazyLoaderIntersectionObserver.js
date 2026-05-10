@@ -1,4 +1,3 @@
-
 export class LazyLoader {
     constructor(options) {
         this.options = options;
@@ -7,18 +6,25 @@ export class LazyLoader {
     createObserver() {
         const callback = this.options.callback;
 
-        const newObserver = new IntersectionObserver(
-            (entries, observer) => {
-                entries.forEach(entry => {
-                    callback(entry, observer);
-                });
-            },
-            {
-                rootMargin: '50%',
-                threshold: 0
-            });
+        const intersectionObserverEntry = {
+            isIntersecting: false,
+            target: null
+        };
 
-        this.observer = newObserver;
+        // Use no-op stub that simply considers all elements to intersect
+        this.observer = {
+            observe: (element) => {
+                intersectionObserverEntry.isIntersecting = true;
+                intersectionObserverEntry.target = element;
+                callback(intersectionObserverEntry, this.observer);
+            },
+            unobserve: () => {
+                // No-op
+            },
+            disconnect: () => {
+                // No-op
+            }
+        };
     }
 
     addElements(elements) {
