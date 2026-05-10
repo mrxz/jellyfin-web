@@ -33,7 +33,8 @@ if (HTMLElement.prototype.nativeFocus === undefined) {
                 this.nativeFocus();
 
                 // Restore window scroll if preventScroll
-                if (options?.preventScroll) {
+                if (options?.preventScroll && !window.__SCROLL_SET) {
+                    window.__SCROLL_SET = false;
                     window.scroll(scrollX, scrollY);
                 }
             };

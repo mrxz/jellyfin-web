@@ -581,9 +581,8 @@ export function scrollToElement(element, smooth) {
 
 if (isEnabled()) {
     dom.addEventListener(window, 'focusin', function(e) {
-        setTimeout(function() {
-            scrollToElement(e.target, useSmoothScroll());
-        }, 0);
+        scrollToElement(e.target, useSmoothScroll());
+        window.__SCROLL_SET = true;
     }, { capture: true });
 }
 
