@@ -147,6 +147,8 @@ export function getCardImageUrl({
             height = width / uiAspect;
         }
 
+        // The pattern for imgUrl is so consistent, that bypassing the SDK and thus Axios is faster
+        /*
         imgUrl = getImageApi(api).getItemImageUrlById(
             itemId,
             imgType,
@@ -157,7 +159,8 @@ export function getCardImageUrl({
                 quality: 96,
                 tag: imgTag
             }
-        );
+        );*/
+        imgUrl = `${api.basePath}/Items/${itemId}/Images/${imgType}?${height ? 'fillHeight=' + Math.round(height) : ''}&${width ? 'fillWidth=' + Math.round(width) : ''}&quality=96&tag=${imgTag}`;
     }
 
     const blurHashes = options.imageBlurhashes || item.ImageBlurHashes || {};

@@ -980,27 +980,69 @@ function renderTagline(page, item) {
     }
 }
 
+function getMetadataItems(type, item) {
+    if (item.Type === BaseItemKind.BoxSet || item.Type === BaseItemKind.Playlist) {
+        return null;
+    }
+
+    switch (type) {
+        case PersonKind.Author:
+        case PersonKind.Director:
+        case PersonKind.Writer:
+            return item.People?.filter(person => person.Type === type).map(person => ({ Id: person.Id, Name: person.Name })) ?? null;
+        case BaseItemKind.Studio:
+            return item.Studios ?? null;
+        case BaseItemKind.Genre:
+            return item.GenreItems ?? null;
+    }
+
+    return null;
+}
+
+function renderMetadataList(type, item, listItems, plural, singular, context = inferContext(item)) {
+    const group = document.createElement('div');
+    group.classList.add('detailsGroupItem');
+
+    const html = listItems.map(function (p) {
+        return '<a style="color:inherit;" class="button-link" is="emby-linkbutton" href="' + appRouter.getRouteUrl({
+            Name: p.Name,
+            Type: type, // FIXME: Not quite correct, but works for most types
+            ServerId: item.ServerId,
+            Id: p.Id
+        }, {
+            context: context
+        }) + '">' + escapeHtml(p.Name) + '</a>';
+    }).join(', ');
+
+    const labelEl = document.createElement('div');
+    labelEl.classList.add('label');
+    labelEl.innerHTML = globalize.translate(listItems.length > 1 ? plural : singular);
+    group.appendChild(labelEl);
+    const valueEl = document.createElement('div');
+    valueEl.classList.add('content');
+    valueEl.classList.add('focuscontainer-x');
+    valueEl.innerHTML = html;
+    group.appendChild(valueEl);
+
+    if (listItems.length) {
+        group.classList.remove('hide');
+    } else {
+        group.classList.add('hide');
+    }
+
+    return group;
+}
+
 function renderDetails(page, instance, item, apiClient, context) {
     const itemDetailsGroup = page.querySelector('.itemDetailsGroup');
 
     if (itemDetailsGroup) {
         itemDetailsGroup.innerHTML = '';
-
-        const metadataTypes = [
-            PersonKind.Author,
-            PersonKind.Director,
-            PersonKind.Writer,
-            BaseItemKind.Studio,
-            BaseItemKind.Genre
-        ];
-
-        for (const type of metadataTypes) {
-            const renderTarget = document.createElement('div');
-            const unmountMethod = renderComponent(ItemDetailsMetadataList, { type, item, context: inferContext(item) }, renderTarget);
-
-            instance._unmount.push(unmountMethod);
-            itemDetailsGroup.appendChild(renderTarget);
-        }
+        itemDetailsGroup.appendChild(renderMetadataList(PersonKind.Author, item, item.People?.filter(person => person.Type === PersonKind.Author), 'Authors', 'Author'));
+        itemDetailsGroup.appendChild(renderMetadataList(PersonKind.Director, item, item.People?.filter(person => person.Type === PersonKind.Director), 'Directors', 'Director'));
+        itemDetailsGroup.appendChild(renderMetadataList(PersonKind.Writer, item, item.People?.filter(person => person.Type === PersonKind.Writer), 'Writers', 'Writer'));
+        itemDetailsGroup.appendChild(renderMetadataList(BaseItemKind.Studio, item, item.Studios, 'Studios', 'Studio'));
+        itemDetailsGroup.appendChild(renderMetadataList(BaseItemKind.Genre, item, item.GenreItems, 'Genres', 'Genre'));
     }
 
     renderSimilarItems(page, item, context);
