@@ -52,7 +52,13 @@ const config = {
         modules: [
             path.resolve(__dirname, 'src'),
             path.resolve(__dirname, 'node_modules')
-        ]
+        ],
+        alias: {
+            react: 'preact/compat',
+            'react-dom/test-utils': 'preact/test-utils',
+            'react-dom': 'preact/compat', // Must be below test-utils
+            'react/jsx-runtime': 'preact/jsx-runtime'
+        }
     },
     plugins: [
         new DefinePlugin({
@@ -217,6 +223,7 @@ const config = {
                     path.resolve(__dirname, 'node_modules/@tanstack/table-core'),
                     path.resolve(__dirname, 'node_modules/@tanstack/virtual-core'),
                     path.resolve(__dirname, 'node_modules/@uupaa/dynamic-import-polyfill'),
+                    path.resolve(__dirname, 'node_modules/preact'),
                     path.resolve(__dirname, 'node_modules/assjs'),
                     path.resolve(__dirname, 'node_modules/axios'),
                     path.resolve(__dirname, 'node_modules/blurhash'),
