@@ -54,6 +54,16 @@ function RootAppLayout() {
     const isNewLayoutPath = Object.values(DASHBOARD_APP_PATHS)
         .some(path => location.pathname.startsWith(`/${path}`));
 
+    if (browser.tv) {
+        return (
+            <>
+                <Backdrop />
+                <AppHeader isHidden={isExperimentalLayout || isNewLayoutPath} />
+
+                <Outlet />
+            </>
+        );
+    }
     return (
         <ThemeProvider
             theme={appTheme}
