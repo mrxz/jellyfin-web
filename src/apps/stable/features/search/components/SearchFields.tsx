@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, type FC, useCallback, useRef } from 'react';
+import React, { type ChangeEvent, type FC, useCallback, useRef, useEffect } from 'react';
 import AlphaPicker from 'components/alphaPicker/AlphaPickerComponent';
 import Input from 'elements/emby-input/Input';
 import globalize from 'lib/globalize';
@@ -33,6 +33,10 @@ const SearchFields: FC<SearchFieldsProps> = ({
     const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         onSearch(e.target.value);
     }, [ onSearch ]);
+
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, []);
 
     return (
         <div className='padded-left padded-right searchFields'>
