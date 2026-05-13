@@ -76,6 +76,15 @@ const dragTouchEvents = ['touchmove', 'touchend'];
 const wheelEvent = (document.implementation.hasFeature('Event.wheel', '3.0') ? 'wheel' : 'mousewheel');
 const interactiveElements = ['INPUT', 'SELECT', 'TEXTAREA'];
 
+// Pre-allocated object for getPos
+const getPosResult = {
+    start: -1,
+    center: -1,
+    end: -1,
+    size: -1,
+    isVisible: false
+};
+
 const scrollerFactory = function (frame, options) {
     // Extend options
     const o = Object.assign({}, {
@@ -361,6 +370,18 @@ const scrollerFactory = function (frame, options) {
      * @return {Object}
      */
     self.getPos = function (item) {
+        // Fast-path
+        if (!transform && o.horizontal) {
+            const offset = item.offsetLeft;
+            const size = item.offsetWidth;
+            getPosResult.start = offset;
+            getPosResult.center = offset + (frameSize / 2) + (size / 2);
+            getPosResult.end = offset - frameSize + size;
+            getPosResult.size = size;
+            getPosResult.isVisible = false;
+            return getPosResult;
+        }
+
         const scrollElement = transform ? slideeElement : nativeScrollElement;
         const slideeOffset = getBoundingClientRect(scrollElement);
         const itemOffset = getBoundingClientRect(item);
@@ -400,13 +421,12 @@ const scrollerFactory = function (frame, options) {
         const isVisible = offset >= Math.min(currentStart, currentEnd)
             && (globalize.getIsRTL() ? (offset - size) : (offset + size)) <= Math.max(currentStart, currentEnd);
 
-        return {
-            start: offset,
-            center: offset + centerOffset - (frameSize / 2) + (size / 2),
-            end: offset - frameSize + size,
-            size,
-            isVisible
-        };
+        getPosResult.start = offset;
+        getPosResult.center = offset + centerOffset - (frameSize / 2) + (size / 2);
+        getPosResult.end = offset - frameSize + size;
+        getPosResult.size = size;
+        getPosResult.isVisible = isVisible;
+        return getPosResult;
     };
 
     self.getCenterPosition = function (item) {
